@@ -18,14 +18,18 @@ void MotorReader::runFrame()
 	m_iMessageLength = 0;
 	int  m_iCircleQueLen = 0;
 	int nlen = m_asynCom.read((char*)m_ucharBuffer, m_iszBufferLen);
-	while (nlen&&m_iCircleQueLen<m_iThresholdValue)
+	while (nlen&&m_iCircleQueLen<m_iQueueCapacity)
 	{
-		if (nlen > 4)
+		if (nlen > m_iMinLen)
 			m_iMessageLength = nlen;
-		else if (nlen <= 4)
+		else if (nlen <= m_iMinLen)
 		{
 			for (int i = 0; i < nlen; i++)
 			{
+				if (m_pCircleQue->isQueueFull())
+				{
+					break;
+				}
 				int m_iTmpValue = (int)m_ucharBuffer[i];
 				m_pCircleQue->InQueue(m_iTmpValue);
 				/**********测试代码*******************/
@@ -37,15 +41,23 @@ void MotorReader::runFrame()
 		//nlen = 4;  测试用
 		nlen = m_asynCom.read((char*)m_ucharBuffer, m_iszBufferLen);
 		m_iCircleQueLen = m_pCircleQue->queue_length();
+		//cout << "m_iCircleQueLen:" << m_iCircleQueLen << endl;
 	}
 
 	/***************是否需要对队列里面进行判断****************************/
-	if (m_iCircleQueLen >= m_iThresholdValue)
+	if (m_iCircleQueLen >= m_iszBufferLen)
 	{
-		m_pCircleQue->queue_traverse();
+		if (m_pCircleQue->queue_traverse() > 0)
+		{
+			vector<int> m_vecData;
+			m_vecData.clear();
+			m_vecData = m_pCircleQue->queueResult();
+			m_iLowPositionValue = m_vecData[0];
+			m_iHighPositionValue = m_vecData[1];
+		}
 	}
 
-	else if (m_iCircleQueLen <= m_iCircleQueLen)
+	else if (m_iCircleQueLen < m_iszBufferLen)
 	{
 		for (int i = m_iMessageLength - 3; i >= 1; i--)
 		{
@@ -60,11 +72,11 @@ void MotorReader::runFrame()
 				{
 					m_iHighPositionValue = m_iHighPositionValue + 256;
 				}
-				cout << "m_iLowPositionValue:" << m_iLowPositionValue << " " << "m_iHighPositionValue:" << m_iHighPositionValue << endl;
 				break;
 			}
 		}
 	}
+	cout << "m_iLowPositionValue:" << m_iLowPositionValue << " " << "m_iHighPositionValue:" << m_iHighPositionValue << endl;
 }
 
 bool    MotorReader::end()

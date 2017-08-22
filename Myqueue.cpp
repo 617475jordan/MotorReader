@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Myqueue.h"
-#include <opencv_all.h>
 
 Myqueue::Myqueue(int queue_capacity)
 {
@@ -17,6 +16,8 @@ void Myqueue::clear_queue()//清空队列
 {
 	m_iHead = m_iTail = 0;
 	m_iQueueLength = 0;
+	m_vecValue.clear();
+
 }
 bool Myqueue::isQueueEmpty()const//判断队列是否为空
 {
@@ -60,7 +61,7 @@ bool Myqueue::InQueue(int element)//入队
 int   Myqueue::queue_traverse()//遍历队列
 {
 	int m_iTmpFlag = -1;
-
+	m_vecValue.clear();
 	if (isQueueEmpty() != true)
 	{
 		for (int i = m_iHead + m_iQueueLength - 3; i >= m_iHead + 1; i--)//注意q_head只是一个整数，i应该小于它与队长的和
@@ -72,23 +73,31 @@ int   Myqueue::queue_traverse()//遍历队列
 			if (m_iTmpHighPositionValue == 187 && m_iTmpLowPositionValue == 170)
 			{
 				m_iTmpFlag = i;
-				int m_iLowPositionValue = m_pCircleQ[i%m_iQueueCapacity + 1];
-				int m_iHighPositionValue = m_pCircleQ[i%m_iQueueCapacity + 2];
-				if (m_iLowPositionValue == 1)
+				m_vecValue.push_back(m_pCircleQ[(i + 1) % m_iQueueCapacity]);
+				m_vecValue.push_back(m_pCircleQ[(i + 2) % m_iQueueCapacity]);
+				if (m_vecValue[0]== 1)
 				{
-					m_iHighPositionValue = m_iHighPositionValue + 256;
+					m_vecValue[1] = m_vecValue[1] + 256;
 				}
+		
+				//cout << "m_iTmpLowPositionValue:" << m_iTmpLowPositionValue << " " << "m_iTmpHighPositionValue:" << m_iTmpHighPositionValue << endl;
+				cout << "m_iLowPositionValue:" << m_vecValue[0] << " " << "m_iHighPositionValue:" << m_vecValue[1] << endl;
 				break;
 			}
 		}
 		if (m_iTmpFlag > 0)
 		{
-			for (int i = 0; i < m_iHead + m_iQueueLength - 3 - m_iTmpFlag; i++)
+			for (int i = 0; i <=  m_iTmpFlag; i++)
 			{
 				DeQueue();
 			}
 		}
 	}
-	return 0;
+	return m_iTmpFlag;
+}
+
+vector<int> Myqueue::queueResult()
+{
+	return m_vecValue;
 }
 
