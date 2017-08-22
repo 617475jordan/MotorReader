@@ -6,7 +6,7 @@ Myqueue::Myqueue(int queue_capacity)
 {
 	m_iQueueCapacity = queue_capacity;
 	clear_queue();
-	CircleQ = new int[queue_capacity];
+	m_pCircleQ = new int[queue_capacity];
 }
 
 
@@ -15,7 +15,7 @@ Myqueue::~Myqueue()
 }
 void Myqueue::clear_queue()//清空队列
 {
-	q_head = q_tail = 0;
+	m_iHead = m_iTail = 0;
 	m_iQueueLength = 0;
 }
 bool Myqueue::isQueueEmpty()const//判断队列是否为空
@@ -37,7 +37,7 @@ bool Myqueue::DeQueue()//出队
 		return false;
 	else
 	{
-		q_head = (q_head++) % m_iQueueCapacity;//对队列的容量取余，体现环形队列的特点
+		m_iHead = (m_iHead++) % m_iQueueCapacity;//对队列的容量取余，体现环形队列的特点
 		m_iQueueLength--;
 		return true;
 	}
@@ -51,8 +51,8 @@ bool Myqueue::InQueue(int element)//入队
 	}
 	else
 	{
-		CircleQ[q_tail] = element;
-		q_tail = (q_tail++) % m_iQueueCapacity;//从队尾入队
+		m_pCircleQ[m_iTail] = element;
+		m_iTail = (m_iTail++) % m_iQueueCapacity;//从队尾入队
 		m_iQueueLength++;
 		return true;
 	}
@@ -63,17 +63,17 @@ int   Myqueue::queue_traverse()//遍历队列
 
 	if (isQueueEmpty() != true)
 	{
-		for (int i = q_head + m_iQueueLength - 3; i >= q_head + 1; i--)//注意q_head只是一个整数，i应该小于它与队长的和
+		for (int i = m_iHead + m_iQueueLength - 3; i >= m_iHead + 1; i--)//注意q_head只是一个整数，i应该小于它与队长的和
 		{
-			int m_iTmpHighPositionValue = CircleQ[i%m_iQueueCapacity];
-			int m_iTmpLowPositionValue = CircleQ[(i-1)%m_iQueueCapacity];
+			int m_iTmpHighPositionValue = m_pCircleQ[i%m_iQueueCapacity];
+			int m_iTmpLowPositionValue = m_pCircleQ[(i-1)%m_iQueueCapacity];
 			//cout << CircleQ[i%m_iQueueCapacity] << " ";//仍是对容量取余
 
 			if (m_iTmpHighPositionValue == 187 && m_iTmpLowPositionValue == 170)
 			{
 				m_iTmpFlag = i;
-				int m_iLowPositionValue = CircleQ[i%m_iQueueCapacity + 1];
-				int m_iHighPositionValue = CircleQ[i%m_iQueueCapacity + 2];
+				int m_iLowPositionValue = m_pCircleQ[i%m_iQueueCapacity + 1];
+				int m_iHighPositionValue = m_pCircleQ[i%m_iQueueCapacity + 2];
 				if (m_iLowPositionValue == 1)
 				{
 					m_iHighPositionValue = m_iHighPositionValue + 256;
@@ -83,7 +83,7 @@ int   Myqueue::queue_traverse()//遍历队列
 		}
 		if (m_iTmpFlag > 0)
 		{
-			for (int i = 0; i < q_head + m_iQueueLength - 3 - m_iTmpFlag; i++)
+			for (int i = 0; i < m_iHead + m_iQueueLength - 3 - m_iTmpFlag; i++)
 			{
 				DeQueue();
 			}
